@@ -1,8 +1,8 @@
 /**
- * @brief Lequel? language identification based on trigrams
+ * @file Lequel.cpp
+ * @brief Language identification based on trigrams
  * @author Marc S. Ressl
- *
- * @copyright Copyright (c) 2022-2023
+ * @date 2023
  *
  * @cite https://towardsdatascience.com/understanding-cosine-similarity-and-its-application-fd42f585296a
  */
@@ -16,43 +16,74 @@
 
 using namespace std;
 
+// Constante para definir el tamaño del n-grama en nuestro caso trigrama
+const size_t TRIGRAM_SIZE = 3;
+
 /**
  * @brief Builds a trigram profile from a given text.
  *
- * @param text Vector of lines (Text)
- * @return TrigramProfile The trigram profile
+ * @param text Vector of lines (UTF-8 encoded strings).
+ * @return TrigramProfile The trigram profile.
  */
-TrigramProfile buildTrigramProfile(const Text &text)
-{
-    wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+TrigramProfile buildTrigramProfile(const Text& text) {
+    // Conversor de UTF-8 (string) a Unicode (wstring)
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-    // Your code goes here...
-    for (auto line : text)
-    {
-        if ((line.length() > 0) &&
-            (line[line.length() - 1] == '\r'))
-            line = line.substr(0, line.length() - 1);
+    TrigramProfile trigramProfile;
+
+    for (const auto& lineUtf8 : text) {
+        string line = lineUtf8;
+
+        // Quitar '\r' de finales de línea en Windows
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+
+        // Convertir a wstring para tratar caracteres Unicode como unidades lógicas
+        wstring unicodeLine = converter.from_bytes(line);
+
+        // Si la línea no alcanza para un trigrama, la ignoramos
+        if (unicodeLine.size() < TRIGRAM_SIZE) continue;
+
+        // Extraer trigramas consecutivos
+        for (size_t i = 0; i <= unicodeLine.size() - TRIGRAM_SIZE; i++) {
+            // Substring Unicode de 3 caracteres
+            wstring trigramW = unicodeLine.substr(i, TRIGRAM_SIZE);
+
+            // Convertir de nuevo a UTF-8 (string) porque TrigramProfile usa string
+            string trigram = converter.to_bytes(trigramW);
+
+            // Acumular la frecuencia del trigrama
+            trigramProfile[trigram] += 1.0f;
+        }
     }
 
-    // Tip: converts UTF-8 string to wstring
-    // wstring unicodeString = converter.from_bytes(textLine);
-
-    // Tip: convert wstring to UTF-8 string
-    // string trigram = converter.to_bytes(unicodeTrigram);
-
-    return TrigramProfile(); // Fill-in result here
+    return trigramProfile;
 }
 
 /**
- * @brief Normalizes a trigram profile.
+ * @brief Normalizes a trigram profile using L2 norm.
  *
- * @param trigramProfile The trigram profile.
+ * @param trigramProfile The trigram profile (modified in place).
  */
-void normalizeTrigramProfile(TrigramProfile &trigramProfile)
-{
-    // Your code goes here...
+void normalizeTrigramProfile(TrigramProfile& trigramProfile) {
+    double sumSquares = 0.0;
 
-    return;
+    // Calcular la suma de cuadrados de todas las frecuencias
+    for (const auto& element : trigramProfile) {
+        sumSquares += static_cast<double>(element.second) * element.second;
+    }
+
+    // Evitar división por cero si el perfil está vacío
+    if (sumSquares == 0.0) return;
+
+    // Norma L2 (longitud del vector de frecuencias)
+    double norm = sqrt(sumSquares);
+
+    // Normalizar cada frecuencia dividiéndola por la norma
+    for (auto& element : trigramProfile) {
+        element.second = static_cast<float>(element.second / norm);
+    }
 }
 
 /**
@@ -82,3 +113,4 @@ string identifyLanguage(const Text &text, LanguageProfiles &languages)
 
     return ""; // Fill-in result here
 }
+
