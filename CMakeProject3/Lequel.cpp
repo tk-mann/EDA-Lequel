@@ -93,11 +93,20 @@ void normalizeTrigramProfile(TrigramProfile& trigramProfile) {
  * @param languageProfile The language trigram profile
  * @return float The cosine similarity score
  */
-float getCosineSimilarity(TrigramProfile &textProfile, TrigramProfile &languageProfile)
+float getCosineSimilarity(TrigramProfile& textProfile, TrigramProfile& languageProfile)
 {
-    // Your code goes here...
-
-    return 0; // Fill-in result here
+    float value = 0.0;
+   
+	// Recorremos ambos perfiles
+    for (auto& text_trigram : textProfile) {
+        for (auto& lang_trigram : languageProfile) {
+            //si ambos trigramas coinciden, calculamos su similitud coseno y la acumulamos
+            if (text_trigram.first == lang_trigram.first) {
+                value += text_trigram.second * lang_trigram.second;
+            }
+        }
+    }
+    return value;
 }
 
 /**
@@ -107,10 +116,25 @@ float getCosineSimilarity(TrigramProfile &textProfile, TrigramProfile &languageP
  * @param languages A list of Language objects
  * @return string The language code of the most likely language
  */
-string identifyLanguage(const Text &text, LanguageProfiles &languages)
+string identifyLanguage(const Text& text, LanguageProfiles& languages)
 {
-    // Your code goes here...
+	// Construimos el perfil de trigramas del texto
+    TrigramProfile TextProfile = buildTrigramProfile(text);
+    //Normalizamos el perfil de texto
+    normalizeTrigramProfile(TextProfile);
 
-    return ""; // Fill-in result here
+    float previous_cosine= -1.0;
+    string lang = "---";
+
+    // Comparamos el perfil de trigramas del texto con cada perfil de lenguaje
+    for (auto& lenguaje : languages) {
+		//obtemnemos la similitud coseno
+        float cosine_simmilarity = getCosineSimilarity(TextProfile, lenguaje.trigramProfile);
+		//si es mayor que la anterior, actualizamos el lenguaje y la similitud de coseno anterior
+        if(cosine_simmilarity > previous_cosine){
+			lang = lenguaje.languageCode;
+            previous_cosine = cosine_simmilarity;
+         }
+    }
+    return lang;
 }
-
