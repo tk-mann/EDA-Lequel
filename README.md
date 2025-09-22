@@ -4,7 +4,7 @@
 
 ## Integrantes del grupo y contribución al trabajo de cada integrante
 
-* Thomas Kaufmann: Unificación de código, implementación de algoritmo coseno 
+* Thomas Kaufmann: Unificación de código, desarrollo de readme, implementación de algoritmo coseno 
 * Bautista Allegrini: Optimización de código,  implementación de trigramas y normalización
 
 
