@@ -1,5 +1,3 @@
-# EDA-Lequel
-
 # EDA #level2: Lequel?
 
 ## Integrantes del grupo y contribución al trabajo de cada integrante
