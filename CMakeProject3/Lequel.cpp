@@ -93,19 +93,24 @@ void normalizeTrigramProfile(TrigramProfile& trigramProfile) {
  * @param languageProfile The language trigram profile
  * @return float The cosine similarity score
  */
-float getCosineSimilarity(TrigramProfile& textProfile, TrigramProfile& languageProfile)
-{
-    float value = 0.0;
-   
-	// Recorremos ambos perfiles
-    for (auto& text_trigram : textProfile) {
-        for (auto& lang_trigram : languageProfile) {
-            //si ambos trigramas coinciden, calculamos su similitud coseno y la acumulamos
-            if (text_trigram.first == lang_trigram.first) {
-                value += text_trigram.second * lang_trigram.second;
-            }
+float getCosineSimilarity(TrigramProfile& textProfile, TrigramProfile& languageProfile) {
+    float value = 0.0f;  // acumulador para el resultado final
+
+    // Recorremos todos los trigramas del perfil del texto
+    for (const auto& kv : textProfile) {
+        const string& trigram = kv.first;  // el trigrama 
+        float freq = kv.second;            // su frecuencia normalizada en el texto
+
+        // Buscamos si ese trigrama también existe en el perfil del idioma
+        auto it = languageProfile.find(trigram);
+
+        // Si existe en ambos perfiles, multiplicamos sus frecuencias
+        // y lo sumamos al valor acumulado (producto punto de vectores)
+        if (it != languageProfile.end()) {
+            value += freq * it->second;
         }
     }
+    // El resultado es la similitud coseno: mayor valor significa perfiles más parecidos
     return value;
 }
 
@@ -138,3 +143,4 @@ string identifyLanguage(const Text& text, LanguageProfiles& languages)
     }
     return lang;
 }
+
