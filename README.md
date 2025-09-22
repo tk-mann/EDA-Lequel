@@ -4,9 +4,9 @@
 
 ## Integrantes del grupo y contribución al trabajo de cada integrante
 
-* [Nombre]: [contribución]
+* Thomas Kaufmann: Unificación de código, implementación de algoritmo coseno 
+* Bautista Allegrini: Optimización de código,  implementación de trigramas y normalización
 
-[completar]
 
 ## Respuestas del enunciado
 
